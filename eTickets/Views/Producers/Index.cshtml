@@ -49,8 +49,14 @@
     </div>
 </div>
 
-<div style="position: fixed;  right: 25px; bottom: 25px;" class="text-white">
+@* commenting below to use partial view here
+    <div style="position: fixed;  right: 25px; bottom: 25px;" class="text-white">
     <a asp-controller="Producers" asp-action="Create" class="btn btn-success">
         <i class="bi bi-plus-circle"></i>Add New
     </a>
-</div>
+</div>*@
+
+@await Html.PartialAsync("_CreateItem", "Producers")
+
+@* here Producers is controller name for this file and that is the parameter string used in partial view file*@
+
