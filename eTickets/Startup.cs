@@ -6,6 +6,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using eTickets.Data.Services;
+using Microsoft.AspNetCore.Http;
+using eTickets.Data.Cart;
+using eTickets.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace eTickets
 {
@@ -29,6 +34,20 @@ namespace eTickets
             services.AddScoped<IProducersService, ProducersService>();
             services.AddScoped<ICinemasService, CinemasService>();
             services.AddScoped<IMoviesService, MoviesService>();
+            services.AddScoped<IOrdersService, OrdersService>();
+
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped(sc => ShoppingCart.GetShoppingCart(sc));
+
+            // Authentication and Authorization
+            services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>();
+            services.AddMemoryCache();
+            services.AddSession();
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                }
+            );
 
             services.AddControllersWithViews();
         }
@@ -50,7 +69,10 @@ namespace eTickets
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseSession();
 
+            // Authentication and Authorization
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -62,6 +84,7 @@ namespace eTickets
 
             // seed the database
             AppDbInitializer.Seed(app);  // if there is no data in db then data will be added
+            AppDbInitializer.SeedUserAndRolesAsync(app).Wait();
         }
     }
 }
